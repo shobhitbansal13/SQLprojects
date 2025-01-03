@@ -1,0 +1,36 @@
+-- # Scenario_2.txt - Aggregate Functions
+
+-- TASK 1 
+
+SELECT genre,count(*) as 'no. of books' FROM books
+GROUP BY genre;
+
+-- TASK 2
+
+SELECT genre,avg(publication_year) FROM books
+GROUP BY genre;
+
+-- TASK 3
+
+SELECT author,count(total_copies) as 'no. of tc',
+count(available_copies) as 'no. of ac' FROM books
+GROUP BY author;
+
+-- TASK 4
+
+SELECT genre,count(*) FROM books 
+GROUP BY genre HAVING count(*) > 3
+
+-- TASK 5
+
+SELECT author, SUM(available_copies) as 'max_book' FROM books
+GROUP BY author 
+ORDER BY max_book 
+DESC LIMIT 1
+
+-- OR
+
+SELECT author, SUM(available_copies) as 'max_book' FROM books
+GROUP BY author HAVING sum(available_copies) = (select max(max_book)
+from (SELECT author, SUM(available_copies) as 'max_book' FROM books
+group by author) as subquery);

@@ -1,0 +1,108 @@
+-- # Scenario_7.txt - Complex Member Analysis 
+
+-- TASK 1
+
+WITH Bbpm AS
+(SELECT members.member_id,CONCAT(members.first_name,' ',members.last_name) AS 'full_name', COUNT(loans.loan_id) AS 'books_borrowed'
+FROM members JOIN loans ON members.member_id= loans.member_id GROUP BY members.member_id),
+
+bgpm AS 
+(SELECT loans.member_id,bbpm.full_name,books.genre FROM loans 
+JOIN books ON books.book_id= loans.book_id
+JOIN bbpm ON loans.member_id= bbpm.member_id),
+
+adtr AS
+(SELECT loans.member_id,bbpm.full_name, Avg(datediff(loans.return_date,loans.loan_date))AS avg_return_day FROM 
+loans JOIN bbpm ON bbpm.member_id= loans.member_id WHERE loans.status= 'Returned' GROUP BY loans.member_id),
+
+Cl AS
+(SELECT loans.member_id,bbpm.full_name,count(loans.loan_id) as current_loan_num from loans
+JOIN bbpm ON bbpm.member_id= loans.member_id WHERE loans.status= 'Borrowed' OR loans.status= 'Overdue'
+GROUP BY loans.member_id)
+
+SELECT bbpm.full_name,
+Bbpm.books_borrowed,
+bgpm.genre,
+adtr.avg_return_day,
+Cl.current_loan_num
+FROM bbpm  LEFT JOIN bgpm ON bbpm.member_id = bgpm.member_id
+ LEFT JOIN adtr ON bbpm.member_id= adtr.member_id
+ LEFT JOIN cl ON bbpm.member_id= cl.member_id;
+
+ -- TASK 2
+
+ 
+WITH  atl5books AS (
+    SELECT members.member_id, CONCAT(members.first_name,' ',members.last_name) as 'full_name',
+CASE
+WHEN count(loans.loan_date) < 5 THEN 'NO match found'
+ELSE count(loans.loan_date)
+END AS borrow_atl_5books FROM members JOIN loans ON members.member_id= loans.member_id
+GROUP BY members.member_id),
+
+Nobovd AS(
+    SELECT loans.member_id,atl5books.full_name AS 'no_overdue' FROM loans JOIN
+    atl5books ON atl5books.member_id= loans.member_id WHERE loans.status= 'borrowed' OR loans.status= 'returned'),
+
+return14avg AS(
+        SELECT atl5books.full_name,loans.member_id,avg(datediff(loans.return_date,loans.loan_date)) AS 'avg_return_date'
+        FROM loans JOIN atl5books ON loans.member_id= atl5books.member_id
+        GROUP BY loans.member_id HAVING  avg(datediff(loans.return_date,loans.loan_date)) < 14
+    ),
+
+    final_results AS(
+ SELECT atl5books.full_name,
+ atl5books.borrow_atl_5books,
+ nobovd.no_overdue,
+ return14avg.avg_return_date,
+ CASE
+ WHEN nobovd.no_overdue IS NOT NULL AND return14avg.avg_return_date IS NOT NULL 
+ THEN 'Eligible'
+ ELSE 'Not Eligible'
+ END AS reward_status
+ FROM  atl5books LEFT JOIN nobovd ON atl5books.member_id= nobovd.member_id
+LEFT JOIN return14avg ON atl5books.member_id= return14avg.member_id)
+
+SELECT * FROM final_results WHERE reward_status= 'Eligible'
+
+-- TASK 3
+
+WITH Mstatus AS (
+    -- CTE to get member details
+    SELECT 
+        members.member_id,
+        CONCAT(members.first_name, ' ', members.last_name) AS full_name
+    FROM 
+        members
+),
+GenreLbook AS (
+    -- CTE to get the latest loan for each member and its genre
+    SELECT 
+        l.member_id,
+        b.genre AS Lgenre
+    FROM 
+        loans l
+    JOIN 
+        books b ON b.book_id = l.book_id
+    WHERE 
+        l.loan_date = (
+            SELECT MAX(sub_loans.loan_date)
+            FROM loans sub_loans
+            WHERE sub_loans.member_id = l.member_id
+        )
+)
+-- Final query to combine member details and latest book genre
+SELECT 
+    Mstatus.full_name,
+    GenreLbook.Lgenre
+FROM 
+    Mstatus
+JOIN 
+    GenreLbook ON Mstatus.member_id = GenreLbook.member_id;
+
+
+
+
+
+
+

@@ -1,0 +1,34 @@
+-- # Scenario_5.txt - Date Operations 
+
+-- TASK 1
+
+SELECT books.title,loans.loan_date,loans.return_date, DATEDIFF(loans.return_date,loans.loan_date) as 'Days borrowed'
+FROM loans JOIN books ON
+books.book_id= loans.book_id
+WHERE loans.status= 'Returned'
+
+-- TASK 2
+
+SELECT books.title,loans.loan_date FROM books
+JOIN loans ON books.book_id= loans.book_id
+WHERE MONTH(loan_date)= 02
+
+-- TASK 3
+
+SELECT members.member_id,members.first_name,members.last_name,members.join_date, DATEDIFF(now(),join_date) AS days_joined
+ FROM members WHERE MONTH(join_date)= 02
+ ORDER BY days_joined DESC LIMIT 15
+
+ -- TASK 4
+
+ SELECT books.title,loans.loan_date,loans.due_date,loans.status,datediff(loans.due_date,loans.loan_date) as 'days_overdue'
+ FROM books JOIN loans ON books.book_id= loans.book_id 
+WHERE loans.status= 'Overdue'
+
+-- TASK 5
+
+
+SELECT books.genre,avg(datediff(loans.return_date,loans.loan_date)) as 'avg loan duration' FROM
+loans  JOIN books ON books.book_id= loans.book_id 
+WHERE loans.status= 'Returned'
+GROUP BY books.genre 

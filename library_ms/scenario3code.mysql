@@ -1,0 +1,26 @@
+-- # Scenario_3.txt - Data Modification
+
+-- TASK 1  
+
+INSERT INTO books(title,author,genre,isbn,publication_year,total_copies,available_copies)
+VALUES('The Catcher in the Rye','J.D. Salinger','Classic','9780743273566','2024','5','3')
+
+-- TASK 2
+
+UPDATE members SET phone= '555-0469' 
+WHERE member_id= 5;
+
+-- TASK 3
+
+UPDATE books SET total_copies= '2',available_copies= '1' 
+WHERE title LIKE '%hobbit%'
+
+-- TASK 4
+
+INSERT INTO members(first_name,last_name,email,phone) 
+VALUES('Rowdy','Campbell','rowdy.c@email.com','555-0010')
+
+-- TASK 5
+
+UPDATE books SET genre= 'Thriller'
+WHERE title= '1984'

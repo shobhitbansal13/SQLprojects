@@ -1,0 +1,28 @@
+-- # Scenario_6.txt - String Operations 
+
+-- TASK 1
+
+SELECT CONCAT(first_name,' ',last_name) as 'Full name' FROM members
+
+-- TASK 2
+
+SELECT title, SUBSTRING_INDEX(title,' ',1) as 'first word'  FROM books
+
+-- TASK 3
+
+SELECT CONCAT(first_name,' ',last_name) as 'Full name', email FROM members
+
+-- TASK 4
+
+SELECT CONCAT('+91',' ', TRIM(leading '555-' from phone)) as refined_phonum FROM members 
+
+-- OR
+
+SELECT CONCAT('+91',' ',replace(phone,'-','')) as refined_phonum FROM members 
+
+-- TASK 5
+
+SELECT concat('Loan Receipt',' : ', books.title ,' borrowed on ',loans.loan_date) AS 'Loan_Receipt' FROM
+books JOIN loans ON books.book_id= loans.book_id
+
+

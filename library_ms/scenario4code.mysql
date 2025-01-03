@@ -1,0 +1,40 @@
+-- # Scenario_4.txt - Member and Book Relations 
+
+-- TASK 1
+
+SELECT members.first_name,members.last_name,books.title,loans.loan_id,loans.loan_date,loans.due_date, loans.status 
+FROM loans JOIN members
+ON members.member_id= loans.member_id
+JOIN books ON books.book_id= loans.book_id
+WHERE members.first_name= 'Robert' AND members.last_name= 'Thomas'
+
+-- TASK 2
+
+SELECT members.first_name,members.last_name,books.title,loans.status 
+FROM loans JOIN members
+ON members.member_id= loans.member_id
+JOIN books ON books.book_id= loans.book_id
+WHERE loans.status= 'Returned'
+
+-- TASK 3
+
+SELECT members.first_name,members.last_name,books.title,books.genre  
+FROM loans JOIN members
+ON members.member_id= loans.member_id
+JOIN books ON books.book_id= loans.book_id
+WHERE genre= 'Fantasy'
+
+-- TASK 4
+
+SELECT books.title,loans.status
+FROM books LEFT 
+JOIN loans ON books.book_id= loans.book_id
+WHERE loans.status IS NULL
+
+-- TASK 5
+
+SELECT members.* ,loans.status
+FROM loans JOIN members
+ON members.member_id= loans.member_id
+WHERE loans.status= 'Overdue'
+

@@ -1,0 +1,97 @@
+-- # Scenario_8.txt - Library Performance Metrics 
+
+-- TASK 1
+WITH LoansIssued AS (
+    SELECT 
+        loan_date AS event_date, 
+        COUNT(*) AS loans_issued
+    FROM loans
+    WHERE loan_date BETWEEN '2024-02-01' AND '2024-05-01'
+    GROUP BY event_date
+),
+BooksReturned AS (
+    SELECT 
+        return_date AS event_date, 
+        COUNT(*) AS books_returned
+    FROM loans
+    WHERE return_date BETWEEN '2024-02-01' AND '2024-05-01'
+    GROUP BY event_date
+),
+NewMembers AS (
+    SELECT 
+        join_date AS event_date, 
+        GROUP_CONCAT(CONCAT(first_name, ' ', last_name)) AS new_members
+    FROM members
+    WHERE join_date BETWEEN '2024-02-01' AND '2024-05-01'
+    GROUP BY event_date
+),
+AllEvents AS (
+    SELECT event_date FROM LoansIssued
+    UNION
+    SELECT event_date FROM BooksReturned
+    UNION
+    SELECT event_date FROM NewMembers
+)
+SELECT 
+    ae.event_date,
+    COALESCE(li.loans_issued, 0) AS loans_issued,
+    COALESCE(br.books_returned, 0) AS books_returned,
+    COALESCE(nm.new_members, '') AS new_members
+FROM AllEvents ae
+LEFT JOIN LoansIssued li ON ae.event_date = li.event_date
+LEFT JOIN BooksReturned br ON ae.event_date = br.event_date
+LEFT JOIN NewMembers nm ON ae.event_date = nm.event_date
+ORDER BY ae.event_date;
+
+-- TASK 2
+
+--  Times borrowed
+   -- Average days between borrow and return
+   -- Currently available
+   -- Demand rating
+
+   WITH timesborrowed AS(
+    SELECT loans.book_id as booksdeet,count(loans.book_id) as borrowcount FROM loans GROUP BY booksdeet
+   ),
+   Avgdays AS(
+    SELECT loans.book_id as booksdeet,avg(datediff(loans.return_date,loans.loan_date)) AS avgdays FROM loans 
+    WHERE loans.return_date IS NOT NULL GROUP BY booksdeet
+    ),
+    curravailable AS(
+        SELECT loans.book_id as booksdeet,CASE 
+        WHEN loans.status= 'Returned' THEN 'AVAILABLE'
+        ELSE 'NOT AVAILABLE'
+        END AS AVAILABILITY
+FROM loans 
+        ),
+        DemandRating AS (
+            SELECT loans.book_id as booksdeet, CASE
+            WHEN COUNT(loans.book_id)= 0 THEN 'No demand'
+            WHEN COUNT(loans.book_id) BETWEEN 1 AND 3 THEN 'Moderate demand'
+            ELSE 'High demand'
+            END AS bookdemand FROM loans GROUP BY booksdeet
+        ), 
+        allevents AS(
+            SELECT booksdeet FROM timesborrowed tb 
+            UNION
+            SELECT booksdeet FROM Avgdays ad
+            UNION
+            SELECT booksdeet FROM curravailable ca 
+            UNION
+            SELECT booksdeet FROM Demandrating dr
+            )
+            SELECT ae.booksdeet,
+    COALESCE(tb.borrowcount, 0) AS borrowcount,
+    COALESCE(ad.avgdays, 0) AS avgdays,
+    COALESCE(ca.AVAILABILITY, 'unknown') AS availability,
+    COALESCE(dr.bookdemand, 'no data') AS bookdemand
+FROM allevents ae
+LEFT JOIN timesborrowed tb ON ae.booksdeet = tb.booksdeet
+LEFT JOIN Avgdays ad ON ae.booksdeet= ad.booksdeet
+LEFT JOIN curravailable ca ON ae.booksdeet= ca.booksdeet
+LEFT JOIN DemandRating dr ON ae.booksdeet= dr.booksdeet
+ORDER BY ae.booksdeet;
+           
+
+
+

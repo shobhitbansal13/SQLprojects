@@ -1,0 +1,36 @@
+-- # SCENARIO 1: Basic Data Retrieval
+
+-- TASK 1
+
+SELECT author,title FROM books 
+WHERE author LIKE '%tolkien'
+
+-- TASK 2
+
+SELECT title,genre,total_copies FROM books
+WHERE genre= 'fantasy'
+AND total_copies > 2
+
+-- TASK 3
+
+SELECT title,publication_year from books
+WHERE publication_year 
+BETWEEN 1950 AND 2000
+
+-- TASK 4
+
+SELECT title,publication_year FROM books
+WHERE title LIKE '%the%' 
+ORDER BY publication_year
+
+-- TASK 5
+
+SELECT title FROM books
+ORDER BY title
+
+
+
+
+
+
+
